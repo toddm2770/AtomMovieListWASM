@@ -1,0 +1,138 @@
+﻿@page "/movielistpage"
+@using AtomMovieListWASM.Models
+@using AtomMovieListWASM.Services
+
+@inject TMDBService TMDB
+
+<div class="container mt-3">
+	<div class="row row-cols-1 g-3">
+		<div class="col text-center text-md-start">
+			<div class="btn-group" role="group" id="btnBar">
+				<input onclick="" type="radio" class="btn-check" name="btnRadio" id="btnNowPlaying" autocomplete="off" checked>
+				<label class="btn btn-outline-success" for="btnNowPlaying">Now Playing</label>
+
+				<input onclick="" type="radio" class="btn-check" name="btnRadio" id="btnPopular" autocomplete="off">
+				<label class="btn btn-outline-success" for="btnPopular">Popular</label>
+
+				<div class="dropdown ms-1">
+					<button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+						Pick a Genre
+					</button>
+					<ul id="drop-down-content" class="dropdown-menu">
+						<li></li>
+					</ul>
+
+				</div>
+			</div>
+		</div>
+		<div class="col order-first">
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="Search for a Movie" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Enter a movie title to search" id="movie-search">
+				<button class="btn btn-outline-success">Search</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="container-xxl py-3">
+	<div class="d-flex flex-column justify-content-between my-3 flex-md-row">
+		<h1 class="display-6">
+			<space class="text-success">
+				<i class="bi bi-movie-reels"></i>
+			</space>
+			@movieSort Movies of All Time
+		</h1>
+	</div>
+
+	<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-lg-5 justify-content-center justify-content-md-start g-3">
+
+		@* for each loop to display movies in cards *@
+		@if (movies != null)
+		{
+
+			@foreach (var movie in movies.Results)
+			{
+				<div class="col">
+				<div class="card h-100 face-in">
+
+					@if (string.IsNullOrEmpty(movie.PosterPath))
+					{
+						<img class="card-img-top" alt="Movie Poster" src="/image/poster.png" />
+					}
+					else
+					{
+						<img class="card-img-top" alt="Movie Poster" src="@(  $"https://image.tmdb.org/t/p/w500{movie.PosterPath}"  )" />
+					}
+
+					<div class="card-body border-top bg-light">
+						<h5 class="card-title text-truncate">@movie.Title</h5>
+						<p class="card-text">@movie.ReleaseDate!.Value.ToString("MMM dd, yyyy")</p>
+					</div>
+					<div class="card-footer text-end">
+						<a class="btn btn-primary" href="/moviedetailspage/@movie.Id">More Info</a>
+					</div>
+					</div>
+				</div>
+
+			}
+		}
+		else
+		{
+
+		}
+
+		@if (movies != null)
+		{
+
+			@foreach (var movie in movies.Results)
+			{
+				<div class="col">
+					<div class="card h-100 face-in">
+
+						@if (string.IsNullOrEmpty(movie.PosterPath))
+						{
+							<img class="card-img-top" alt="Movie Poster" src="/image/poster.png" />
+						}
+						else
+						{
+							<img class="card-img-top" alt="Movie Poster" src="@(  $"https://image.tmdb.org/t/p/w500{movie.PosterPath}"  )" />
+						}
+
+						<div class="card-body border-top bg-light">
+							<h5 class="card-title text-truncate">@movie.Title</h5>
+							<p class="card-text">@movie.ReleaseDate!.Value.ToString("MMM dd, yyyy")</p>
+						</div>
+						<div class="card-footer text-end">
+							<a class="btn btn-primary" href="/moviedetailspage/@movie.Id">More Info</a>
+						</div>
+					</div>
+				</div>
+
+			}
+		}
+		else
+		{
+
+		}
+
+
+	</div>
+</div>
+
+@code {
+	string? movieSort = "";
+
+	MovieResponse? movies;
+
+	
+	protected override async Task OnInitializedAsync()
+	{
+		movies = await TMDB.GetNowPlayingMoviesAsync();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		movies = await TMDB.GetPopularMoviesAsync();
+	}
+
+}

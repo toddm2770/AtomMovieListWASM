@@ -1,0 +1,109 @@
+﻿@page "/moviedetailspage/{id:int}"
+@using AtomMovieListWASM.Models
+@using AtomMovieListWASM.Services
+@inject TMDBService TMDB
+
+<PageTitle>@movieDetails?.Title</PageTitle>
+
+@if (movieDetails != null)
+{
+
+<!--Page Banner-->
+<div class="hero-bg" style="@( $"--bg-img: url( https://image.tmdb.org/t/p/original/{movieDetails.BackdropPath})" )">
+    <div class="hero-container">
+        <div class="container-xxl d-flex flex-column flex-md-row">
+            <div class="flex-grow-1 d-flex align-items-center justify-content-center justify-content-md-end">
+
+                <!-- Let's write code here -->
+
+                <div class="title-container text-center text-md-end">
+                    <h1 class="text-light">@movieDetails.Title</h1>
+                        <h2 class="text-light">@movieDetails.Tagline</h2>
+
+                    @if(DateTime.TryParse(movieDetails.ReleaseDate, out DateTime releaseDate))
+                    {
+                        <span class="badge me-3 text-light">@releaseDate.ToString("MMM dd yyyy")</span>
+                    }
+
+                        @{
+                            var runtime = $"{movieDetails.Runtime / 60}h{movieDetails?.Runtime % 60}m";
+                            var rating = (movieDetails.VoteAverage * 10).ToString("F1");
+                        }
+
+                        <span class="badge me-3 text-bg-dark">@runtime</span>
+                        <span class="badge me-3 text-bg-success">@rating% <i class="bi bi-stars"></i></span>
+                        <div class="movie-links">
+                            <div class="d-flex justify-content-center justify-content-md-end">
+                                @if (string.IsNullOrEmpty(movieDetails.Homepage))
+                                {
+                                    <div class="text-center px-2">
+                                        <a href="@movieDetails.Homepage" target="_blank" class="btn btn-outline-light rounded-pill">Website</a>
+                                    </div>
+                                }
+                                @if (string.IsNullOrEmpty(movieDetails.ImdbId))
+                                {
+                                    <div class="text-center px-2">
+                                        <a href="@($"https://www.imdb.com/title/{movieDetails.ImdbId}")" target="_blank" class="btn btn-outline-warning rounded-pill">IMDB</a>
+                                    </div>
+                                }                              
+                            </div>
+                        </div>
+                </div>
+            </div>
+            <div class="order-last order-md-first d-flex justify-content-center">
+                <div class="poster-container">
+
+                    <!-- And here... -->
+                    @if(string.IsNullOrEmpty(movieDetails.PosterPath))
+                        {
+                            <img class="bg-light" src="/image/poster.png" />
+                        } 
+                        else
+                        {
+                            <img src="@($"https://image.tmdb.org/t/p/w500{movieDetails.PosterPath}")" alt="Movie Poster" />
+                        }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Movie Details-->
+<div class="container-xxl">
+    <div class="overview d-flex flex-column">
+        <p>@movieDetails.Overview</p>
+        <div class="small mt-auto text-center text-md-start">
+
+            <!--And also Here-->
+                @foreach (Genre genre in movieDetails.Genres)
+                {
+                    <a href="" class="text-decoration-none text-dark rounded-pill bg-secondary-subtle px-3 d-inline-block m-1">@genre.Name</a>
+                }
+
+                @if (movieDetails.SpokenLanguages.Any())
+                {
+                    <div class="text-muted my-3">
+                        Languages: @string.Join(", ", movieDetails.SpokenLanguages.Select(sl => sl.EnglishName))
+                    </div>
+                }
+
+        </div>
+    </div>
+</div>
+}
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    MovieDetails? movieDetails;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        //GetHashCode movie detail from TMDB
+        movieDetails = await TMDB.GetMovieDetailsAsync(Id);
+    }
+
+}
